@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiv Självskattning: Digital Mognad</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .question {
+            margin-bottom: 25px;
+            background-color: #e6f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #b3e0ff;
+            text-align: center;
+        }
+        .question p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #0056b3;
+        }
+        .options button {
+            padding: 12px 25px;
+            margin: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .options button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .options button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #d4edda;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            font-weight: bold;
+            color: #155724;
+            font-size: 1.3em;
+            text-align: center;
+            display: none;
+        }
+        .level-bronze { background-color: #fce8d4; border-color: #f7d7b9; color: #8a6d3b; }
+        .level-silver { background-color: #e0e0e0; border-color: #c0c0c0; color: #555; }
+        .level-gold { background-color: #fffac8; border-color: #ffe08a; color: #8b7500; }
+        #startScreen button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Välkommen till Digital Mognad Självskattning!</h1>
+        <p style="text-align: center; margin-bottom: 30px;">Få en indikation på din digitala mognad genom att svara på några frågor.</p>
+
+        <div id="startScreen" style="text-align: center; padding: 20px;">
+            <button onclick="startAssessment()" style="padding: 15px 30px; font-size: 1.2em; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease;">Starta Självskattningen</button>
+        </div>
+
+        <div id="assessmentContent" style="display: none;">
+            <div id="q1" class="question">
+                <p><strong>Fråga 1: Hur ofta använder du e-post för kommunikation (privat eller arbete)?</strong></p>
+                <div class="options">
+                    <button onclick="answerQuestion(1, 0)">Aldrig eller sällan</button>
+                    <button onclick="answerQuestion(1, 1)">Några gånger i månaden</button>
+                    <button onclick="answerQuestion(1, 2)">Några gånger i veckan</button>
+                    <button onclick="answerQuestion(1, 3)">Dagligen</button>
+                </div>
+            </div>
+
+            <div id="q2" class="question" style="display: none;">
+                <p><strong>Fråga 2: Hur bekväm är du med att installera nya appar eller program på din enhet?</strong></p>
+                <div class="options">
+                    <button onclick="answerQuestion(2, 0)">Behöver alltid hjälp</button>
+                    <button onclick="answerQuestion(2, 1)">Lite osäker, men kan försöka</button>
+                    <button onclick="answerQuestion(2, 2)">Ganska bekväm</button>
+                    <button onclick="answerQuestion(2, 3)">Mycket bekväm, fixar det själv</button>
+                </div>
+            </div>
+
+            <div id="q3" class="question" style="display: none;">
+                <p><strong>Fråga 3: Hur ofta söker du information eller löser problem online på egen hand?</strong></p>
+                <div class="options">
+                    <button onclick="answerQuestion(3, 0)">Sällan, frågar andra</button>
+                    <button onclick="answerQuestion(3, 1)">Ibland, om det är enkelt</button>
+                    <button onclick="answerQuestion(3, 2)">Ofta, för det mesta</button>
+                    <button onclick="answerQuestion(3, 3)">Alltid, min första instinkt</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let totalPoints = 0;
+        let currentQuestion = 1;
+        const numberOfQuestions = 3;
+
+        function startAssessment() {
+            // Dölj startskärmen
+            document.getElementById('startScreen').style.display = 'none';
+
+            // Dölj resultat-diven (om den visades från en tidigare körning)
+            document.getElementById('result').style.display = 'none';
+
+            // Visa själva frågeinnehålls-containern
+            document.getElementById('assessmentContent').style.display = 'block';
+
+            // Dölj alla frågor explicit för att säkerställa att bara den första syns
+            for (let i = 1; i <= numberOfQuestions; i++) {
+                document.getElementById('q' + i).style.display = 'none';
+            }
+
+            // Återställ variabler
+            totalPoints = 0;
+            currentQuestion = 1;
+
+            // Visa den första frågan
+            document.getElementById('q' + currentQuestion).style.display = 'block';
+        }
+
+        function answerQuestion(questionNumber, points) {
+            totalPoints += points;
+            document.getElementById('q' + questionNumber).style.display = 'none'; // Dölj nuvarande fråga
+
+            currentQuestion++;
+
+            if (currentQuestion <= numberOfQuestions) {
+                document.getElementById('q' + currentQuestion).style.display = 'block'; // Visa nästa fråga
+            } else {
+                displayResult(); // Alla frågor besvarade
+            }
+        }
+
+        function displayResult() {
+            document.getElementById('assessmentContent').style.display = 'none'; // Dölj hela frågekontainern
+            const resultDiv = document.getElementById('result');
+            let level = '';
+            let message = '';
+            let resultClass = '';
+
+            // Max poäng är 3 frågor * 3 poäng/fråga = 9 poäng
+            if (totalPoints >= 7) {
+                level = 'Guldnivå';
+                message = 'Grattis! Du har en mycket hög digital mognad. Du är troligtvis en föregångare när det gäller att hantera digitala verktyg och information.';
+                resultClass = 'level-gold';
+            } else if (totalPoints >= 4) {
+                level = 'Silvernivå';
+                message = 'Bra jobbat! Du har en god digital mognad. Du är bekväm med det mesta online och kan troligen lösa många digitala utmanningar på egen hand.';
+                resultClass = 'level-silver';
+            } else {
+                level = 'Bronsnivå';
+                message = 'Du är på väg! Det finns potential att utveckla din digitala mognad ytterligare. Fortsätt utforska och lära dig nya digitala färdigheter!';
+                resultClass = 'level-bronze';
+            }
+
+            resultDiv.innerHTML = `
+                <h2>Din Digitala Mognad: ${level}</h2>
+                <p>Din totala poäng: ${totalPoints} av ${numberOfQuestions * 3} möjliga.</p>
+                <p>${message}</p>
+                <button onclick="startAssessment()" style="margin-top: 20px; padding: 10px 20px; font-size: 1em; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Starta om testet</button>
+            `;
+            resultDiv.className = resultClass;
+            resultDiv.style.display = 'block'; // Visa resultatdiven
+        }
+    </script>
+</body>
+</html>
